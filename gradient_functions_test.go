@@ -94,7 +94,7 @@ func TestMeanSquaredGradient(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r, c := tt.want.Dims()
 			tt.want.Scale(float64(r*c), tt.want)
-			if got := MeanSquaredGradient(tt.args.yPred, tt.args.yTrue); !matricesAlmostEqual(*got, *tt.want, 0.00001) {
+			if got := MeanSquaredGradient(tt.args.yPred, tt.args.yTrue); !matricesAlmostEqual(got, tt.want, 0.00001) {
 				t.Errorf("MeanSquaredGradient() = %v, want %v", got, tt.want)
 			}
 		})

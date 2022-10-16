@@ -10,14 +10,14 @@ import (
 
 type Layer interface {
 	Name() string
-	Forward(input mat.Dense) mat.Dense
-	Backward(outputError mat.Dense, learningRate float64) mat.Dense
+	Forward(input *mat.Dense) mat.Dense
+	Backward(outputError *mat.Dense, learningRate float64) mat.Dense
 }
 
 // Dense a standard densely-connected neural network layer
 type Dense struct {
-	Weights mat.Dense
-	Biases  mat.Dense
+	Weights *mat.Dense
+	Biases  *mat.Dense
 
 	_input  mat.Dense
 	_output mat.Dense
@@ -30,13 +30,13 @@ func NewDense(inputSize, outputSize int) *Dense {
 		data = append(data, rand.Float64()-0.5)
 	}
 
-	layer.Weights = *mat.NewDense(inputSize, outputSize, data)
+	layer.Weights = mat.NewDense(inputSize, outputSize, data)
 
 	data = []float64{}
 	for i := 0; i < outputSize; i++ {
 		data = append(data, rand.Float64()-0.5)
 	}
-	layer.Biases = *mat.NewDense(1, outputSize, data)
+	layer.Biases = mat.NewDense(1, outputSize, data)
 
 	return &layer
 }
@@ -46,8 +46,8 @@ func (layer *Dense) MarshalJSON() ([]byte, error) {
 		Weights serializedMatrix `json:"weights"`
 		Biases  serializedMatrix `json:"biases"`
 	}{
-		serializeDenseMatrix(&layer.Weights),
-		serializeDenseMatrix(&layer.Biases),
+		serializeDenseMatrix(layer.Weights),
+		serializeDenseMatrix(layer.Biases),
 	})
 }
 
@@ -61,8 +61,8 @@ func (layer *Dense) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	layer.Weights = *serialized.Weights.DenseMatrix()
-	layer.Biases = *serialized.Biases.DenseMatrix()
+	layer.Weights = serialized.Weights.DenseMatrix()
+	layer.Biases = serialized.Biases.DenseMatrix()
 	return nil
 }
 
@@ -70,9 +70,9 @@ func (layer *Dense) Name() string {
 	return "Dense"
 }
 
-func (layer *Dense) Forward(input mat.Dense) mat.Dense {
-	layer._input = input
-	layer._output.Mul(&layer._input, &layer.Weights)
+func (layer *Dense) Forward(input *mat.Dense) mat.Dense {
+	layer._input = *input
+	layer._output.Mul(input, layer.Weights)
 
 	var rowData = layer.Biases.RawRowView(0)
 	var data []float64
@@ -87,16 +87,16 @@ func (layer *Dense) Forward(input mat.Dense) mat.Dense {
 	return layer._output
 }
 
-func (layer *Dense) Backward(outputError mat.Dense, learningRate float64) mat.Dense {
+func (layer *Dense) Backward(outputError *mat.Dense, learningRate float64) mat.Dense {
 	var inputError, weightsError mat.Dense
 
-	inputError.Mul(&outputError, layer.Weights.T())
-	weightsError.Mul(layer._input.T(), &outputError)
+	inputError.Mul(outputError, layer.Weights.T())
+	weightsError.Mul(layer._input.T(), outputError)
 
 	weightsError.Scale(learningRate, &weightsError)
-	layer.Weights.Sub(&layer.Weights, &weightsError)
+	layer.Weights.Sub(layer.Weights, &weightsError)
 
-	outputError.Scale(learningRate, &outputError)
+	outputError.Scale(learningRate, outputError)
 
 	r, c := outputError.Dims()
 	var colAverages []float64
@@ -116,7 +116,7 @@ func (layer *Dense) Backward(outputError mat.Dense, learningRate float64) mat.De
 	}
 
 	var outputErrorAverages = mat.NewDense(1, len(colAverages), colAverages)
-	layer.Biases.Sub(&layer.Biases, outputErrorAverages)
+	layer.Biases.Sub(layer.Biases, outputErrorAverages)
 	return inputError
 }
 
@@ -164,14 +164,14 @@ func (layer *Activation) Name() string {
 	return "Activation"
 }
 
-func (layer *Activation) Forward(input mat.Dense) mat.Dense {
-	layer._input = input
-	layer._output = layer.Activation(input)
+func (layer *Activation) Forward(input *mat.Dense) mat.Dense {
+	layer._input = *input
+	layer._output = *layer.Activation(input)
 	return layer._output
 }
 
-func (layer *Activation) Backward(outputError mat.Dense, _ float64) mat.Dense {
-	var inputError = layer.ActivationPrime(layer._input)
-	inputError.MulElem(&inputError, &outputError)
-	return inputError
+func (layer *Activation) Backward(outputError *mat.Dense, _ float64) mat.Dense {
+	var inputError = layer.ActivationPrime(&layer._input)
+	inputError.MulElem(inputError, outputError)
+	return *inputError
 }

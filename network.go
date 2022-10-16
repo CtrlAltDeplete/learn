@@ -74,7 +74,7 @@ func (network *Network) UnmarshalJSON(data []byte) error {
 func (network *Network) Predict(x *mat.Dense) *mat.Dense {
 	var yPred = *x
 	for _, layer := range *network {
-		yPred = layer.Forward(yPred)
+		yPred = layer.Forward(&yPred)
 	}
 	return &yPred
 }
@@ -90,7 +90,7 @@ func (network *Network) Train(xs []*mat.Dense, ys []*mat.Dense, errorFunc ErrorF
 			errPrime := gradFunc(yPred, ys[j])
 
 			for k := len(*network) - 1; k >= 0; k-- {
-				*errPrime = (*network)[k].Backward(*errPrime, learningRate)
+				*errPrime = (*network)[k].Backward(errPrime, learningRate)
 			}
 		}
 

@@ -15,11 +15,11 @@ func main() {
 		0, 1,
 		1, 0,
 		1, 1,
-	}), 1, false)
+	}), 4, false)
 
 	var yTrain = learn.BatchDataset(mat.NewDense(4, 1, []float64{
 		0, 1, 1, 1,
-	}), 1, false)
+	}), 4, false)
 
 	var network learn.Network
 	network = append(network, learn.NewDense(2, 1))

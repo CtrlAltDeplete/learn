@@ -20,11 +20,11 @@ func TestNetwork_JSON(t *testing.T) {
 					ActivationPrime: SigmoidPrime,
 				},
 				&Dense{
-					Weights: *mat.NewDense(2, 6, []float64{
+					Weights: mat.NewDense(2, 6, []float64{
 						-0.12546, 0.45071, 0.23199, 0.09866, -0.34398, -0.34401,
 						-0.44192, 0.36618, 0.10112, 0.20807, -0.47942, 0.46991,
 					}),
-					Biases: *mat.NewDense(1, 6, []float64{
+					Biases: mat.NewDense(1, 6, []float64{
 						0.33244, -0.28766, -0.31818, -0.31660, -0.19576, 0.02476,
 					}),
 				},

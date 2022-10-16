@@ -11,27 +11,27 @@ func TestDense_Forward(t *testing.T) {
 	tests := []struct {
 		name  string
 		layer Dense
-		args  mat.Dense
-		want  mat.Dense
+		args  *mat.Dense
+		want  *mat.Dense
 	}{
 		{
 			"happy path",
 			Dense{
-				Weights: *mat.NewDense(2, 6, []float64{
+				Weights: mat.NewDense(2, 6, []float64{
 					-0.12546, 0.45071, 0.23199, 0.09866, -0.34398, -0.34401,
 					-0.44192, 0.36618, 0.10112, 0.20807, -0.47942, 0.46991,
 				}),
-				Biases: *mat.NewDense(1, 6, []float64{
+				Biases: mat.NewDense(1, 6, []float64{
 					0.33244, -0.28766, -0.31818, -0.31660, -0.19576, 0.02476,
 				}),
 			},
-			*mat.NewDense(1, 2, []float64{0, 0}),
-			*mat.NewDense(1, 6, []float64{0.33244, -0.28766, -0.31818, -0.31660, -0.19576, 0.02476}),
+			mat.NewDense(1, 2, []float64{0, 0}),
+			mat.NewDense(1, 6, []float64{0.33244, -0.28766, -0.31818, -0.31660, -0.19576, 0.02476}),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.layer.Forward(tt.args); !reflect.DeepEqual(got, tt.want) {
+			if got := tt.layer.Forward(tt.args); !matricesAlmostEqual(&got, tt.want, 0.00001) {
 				t.Errorf("Dense Forward() = %v, want %v", got, tt.want)
 			}
 		})
@@ -40,23 +40,23 @@ func TestDense_Forward(t *testing.T) {
 
 func TestDense_Backward(t *testing.T) {
 	type args struct {
-		outputError  mat.Dense
+		outputError  *mat.Dense
 		learningRate float64
 	}
 	tests := []struct {
 		name  string
 		layer Dense
 		args  args
-		want  mat.Dense
+		want  *mat.Dense
 	}{
 		{
 			"happy path",
 			Dense{
-				Weights: *mat.NewDense(2, 6, []float64{
+				Weights: mat.NewDense(2, 6, []float64{
 					-0.12546, 0.45071, 0.23199, 0.09866, -0.34398, -0.34401,
 					-0.44192, 0.36618, 0.10112, 0.20807, -0.47942, 0.46991,
 				}),
-				Biases: *mat.NewDense(1, 6, []float64{
+				Biases: mat.NewDense(1, 6, []float64{
 					0.33244, -0.28766, -0.31818, -0.31660, -0.19576, 0.02476,
 				}),
 				_input: *mat.NewDense(4, 2, []float64{
@@ -73,7 +73,7 @@ func TestDense_Backward(t *testing.T) {
 				}),
 			},
 			args{
-				*mat.NewDense(4, 6, []float64{
+				mat.NewDense(4, 6, []float64{
 					0.00441, 0.00298, -0.01271, -0.00234, -0.00262, -0.00522,
 					0.00391, 0.00305, -0.01106, -0.00231, -0.00242, -0.00511,
 					0.00255, 0.00380, -0.00640, -0.00236, -0.00167, -0.00582,
@@ -81,7 +81,7 @@ func TestDense_Backward(t *testing.T) {
 				}),
 				0.1,
 			},
-			*mat.NewDense(4, 2, []float64{
+			mat.NewDense(4, 2, []float64{
 				0.00031, -0.00382,
 				0.00068, -0.00345,
 				0.00225, -0.00280,
@@ -91,7 +91,7 @@ func TestDense_Backward(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.layer.Backward(tt.args.outputError, tt.args.learningRate); !matricesAlmostEqual(got, tt.want, 0.0001) {
+			if got := tt.layer.Backward(tt.args.outputError, tt.args.learningRate); !matricesAlmostEqual(&got, tt.want, 0.0001) {
 				t.Errorf("Dense Backward() = %v, want %v", got, tt.want)
 			}
 		})
@@ -105,10 +105,10 @@ func FuzzDense_JSON(t *testing.F) {
 		var marshalled []byte
 		var got Dense
 		var want = Dense{
-			Weights: *mat.NewDense(1, 4, []float64{
+			Weights: mat.NewDense(1, 4, []float64{
 				i, j, k, l,
 			}),
-			Biases: *mat.NewDense(1, 4, []float64{
+			Biases: mat.NewDense(1, 4, []float64{
 				m, n, o, p,
 			}),
 		}
@@ -131,8 +131,8 @@ func TestActivation_Forward(t *testing.T) {
 	tests := []struct {
 		name  string
 		layer Activation
-		args  mat.Dense
-		want  mat.Dense
+		args  *mat.Dense
+		want  *mat.Dense
 	}{
 		{
 			"happy path",
@@ -140,13 +140,13 @@ func TestActivation_Forward(t *testing.T) {
 				Activation:      Sigmoid,
 				ActivationPrime: SigmoidPrime,
 			},
-			*mat.NewDense(1, 3, []float64{-0.22983, -0.94082, 0.65286}),
-			*mat.NewDense(1, 3, []float64{0.44279, 0.28073, 0.65765}),
+			mat.NewDense(1, 3, []float64{-0.22983, -0.94082, 0.65286}),
+			mat.NewDense(1, 3, []float64{0.44279, 0.28073, 0.65765}),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.layer.Forward(tt.args); !matricesAlmostEqual(got, tt.want, 0.0001) {
+			if got := tt.layer.Forward(tt.args); !matricesAlmostEqual(&got, tt.want, 0.0001) {
 				t.Errorf("Activation Forward() = %v, want %v", got, tt.want)
 			}
 		})
@@ -157,8 +157,8 @@ func TestActivation_Backward(t *testing.T) {
 	tests := []struct {
 		name  string
 		layer Activation
-		args  mat.Dense
-		want  mat.Dense
+		args  *mat.Dense
+		want  *mat.Dense
 	}{
 		{
 			name: "happy path",
@@ -178,13 +178,13 @@ func TestActivation_Backward(t *testing.T) {
 					0.41942, 0.32609, 0.66987,
 				}),
 			},
-			args: *mat.NewDense(4, 3, []float64{
+			args: mat.NewDense(4, 3, []float64{
 				-0.09287, -0.11988, -0.05706,
 				-0.08174, -0.09493, -0.04361,
 				-0.04223, -0.07138, -0.00287,
 				-0.03111, -0.04666, 0.01063,
 			}),
-			want: *mat.NewDense(4, 3, []float64{
+			want: mat.NewDense(4, 3, []float64{
 				-0.02291, -0.02421, -0.01285,
 				-0.01989, -0.02129, -0.00995,
 				-0.01042, -0.01403, -0.00062,
@@ -194,7 +194,7 @@ func TestActivation_Backward(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.layer.Backward(tt.args, 0); !matricesAlmostEqual(got, tt.want, 0.0001) {
+			if got := tt.layer.Backward(tt.args, 0); !matricesAlmostEqual(&got, tt.want, 0.0001) {
 				t.Errorf("Activation Backward() = %v, want %v", got, tt.want)
 			}
 		})

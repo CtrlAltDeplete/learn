@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-func matricesAlmostEqual(got, want mat.Dense, tolerance float64) bool {
+func matricesAlmostEqual(got, want *mat.Dense, tolerance float64) bool {
 	gotR, gotC := got.Dims()
 	wantR, wantC := want.Dims()
 	if gotR != wantR || gotC != wantC {

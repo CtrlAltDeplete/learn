@@ -8,13 +8,13 @@ import (
 func TestSigmoid(t *testing.T) {
 	tests := []struct {
 		name string
-		args mat.Dense
-		want mat.Dense
+		args *mat.Dense
+		want *mat.Dense
 	}{
 		{
 			"happy path",
-			*mat.NewDense(2, 4, []float64{-100, -10, -1, -0.1, 0.1, 1, 10, 100}),
-			*mat.NewDense(2, 4, []float64{
+			mat.NewDense(2, 4, []float64{-100, -10, -1, -0.1, 0.1, 1, 10, 100}),
+			mat.NewDense(2, 4, []float64{
 				0.00000, 0.00005, 0.26894, 0.47502,
 				0.52498, 0.73106, 0.99995, 1.00000,
 			}),
@@ -42,13 +42,13 @@ func Fuzz_sigmoid(t *testing.F) {
 func TestSigmoidPrime(t *testing.T) {
 	tests := []struct {
 		name string
-		args mat.Dense
-		want mat.Dense
+		args *mat.Dense
+		want *mat.Dense
 	}{
 		{
 			"happy path",
-			*mat.NewDense(2, 4, []float64{-100, -10, -1, -0.1, 0.1, 1, 10, 100}),
-			*mat.NewDense(2, 4, []float64{
+			mat.NewDense(2, 4, []float64{-100, -10, -1, -0.1, 0.1, 1, 10, 100}),
+			mat.NewDense(2, 4, []float64{
 				0.00000, 0.00005, 0.19661, 0.24938,
 				0.24938, 0.19661, 0.00005, 0.00000,
 			}),
