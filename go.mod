@@ -1,4 +1,4 @@
-module learn
+module github.com/CtrlAltDeplete/learn
 
 go 1.19
 
