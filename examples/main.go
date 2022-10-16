@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"gonum.org/v1/gonum/mat"
 	"learn"
+	"math/rand"
 )
 
 func main() {
+	rand.Seed(42)
+
 	var xTrain = learn.BatchDataset(mat.NewDense(4, 2, []float64{
 		0, 0,
 		0, 1,
@@ -30,7 +33,7 @@ func main() {
 		fmt.Printf("Network(%f, %f) = %f\n", batch.At(0, 0), batch.At(0, 1), yPred.At(0, 0))
 	}
 
-	network.Train(xTrain, yTrain, learn.MeanSquaredError, learn.MeanSquaredErrorPrime, 100, 1, 1)
+	network.Train(xTrain, yTrain, learn.MeanSquaredError, learn.MeanSquaredGradient, 1000, 1, 1)
 
 	for _, batch := range xTrain {
 		yPred := network.Predict(batch)

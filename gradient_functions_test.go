@@ -2,11 +2,10 @@ package learn
 
 import (
 	"gonum.org/v1/gonum/mat"
-	"math"
 	"testing"
 )
 
-func TestMeanSquaredError(t *testing.T) {
+func TestMeanSquaredGradient(t *testing.T) {
 	type args struct {
 		yPred *mat.Dense
 		yTrue *mat.Dense
@@ -14,7 +13,7 @@ func TestMeanSquaredError(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want float64
+		want *mat.Dense
 	}{
 		{
 			name: "happy path",
@@ -32,10 +31,15 @@ func TestMeanSquaredError(t *testing.T) {
 					0.60606, 0.60606, 0.60606,
 				}),
 			},
-			want: 0.16197308716822795,
+			want: mat.NewDense(4, 3, []float64{
+				-0.09286833333333333, -0.11987833333333334, -0.057058333333333336,
+				-0.08174333333333332, -0.09493499999999999, -0.04360833333333332,
+				-0.042228333333333326, -0.07137666666666666, -0.0028683333333333243,
+				-0.03110666666666667, -0.04666166666666667, 0.010634999999999986,
+			}),
 		},
 		{
-			name: "zeroes",
+			name: "zeros",
 			args: args{
 				yPred: mat.NewDense(2, 2, []float64{
 					0, 0,
@@ -46,7 +50,10 @@ func TestMeanSquaredError(t *testing.T) {
 					0, 0,
 				}),
 			},
-			want: 0.0,
+			want: mat.NewDense(2, 2, []float64{
+				0, 0,
+				0, 0,
+			}),
 		},
 		{
 			name: "ones",
@@ -60,7 +67,10 @@ func TestMeanSquaredError(t *testing.T) {
 					1, 1,
 				}),
 			},
-			want: 1.0,
+			want: mat.NewDense(2, 2, []float64{
+				-0.5, -0.5,
+				-0.5, -0.5,
+			}),
 		},
 		{
 			name: "negative ones",
@@ -74,13 +84,18 @@ func TestMeanSquaredError(t *testing.T) {
 					-1, -1,
 				}),
 			},
-			want: 1.0,
+			want: mat.NewDense(2, 2, []float64{
+				0.5, 0.5,
+				0.5, 0.5,
+			}),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := MeanSquaredError(tt.args.yPred, tt.args.yTrue); math.Abs(got-tt.want) > 0.00001 {
-				t.Errorf("MeanSquaredError() = %v, want %v", got, tt.want)
+			r, c := tt.want.Dims()
+			tt.want.Scale(float64(r*c), tt.want)
+			if got := MeanSquaredGradient(tt.args.yPred, tt.args.yTrue); !matricesAlmostEqual(*got, *tt.want, 0.00001) {
+				t.Errorf("MeanSquaredGradient() = %v, want %v", got, tt.want)
 			}
 		})
 	}

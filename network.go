@@ -79,15 +79,15 @@ func (network *Network) Predict(x *mat.Dense) *mat.Dense {
 	return &yPred
 }
 
-func (network *Network) Train(xs []*mat.Dense, ys []*mat.Dense, errorFunc ErrorFunction, primeFunc PrimeFunction, epochs int,
-	learningRate float64, checkIn int) {
+func (network *Network) Train(xs []*mat.Dense, ys []*mat.Dense, errorFunc ErrorFunction, gradFunc GradientFunction,
+	epochs int, learningRate float64, checkIn int) {
 	for i := 1; i <= epochs; i++ {
 		err := 0.0
 		for j, batch := range xs {
 			var yPred = network.Predict(batch)
 
-			err += errorFunc(ys[j], yPred)
-			errPrime := primeFunc(ys[j], yPred)
+			err += errorFunc(yPred, ys[j])
+			errPrime := gradFunc(yPred, ys[j])
 
 			for k := len(*network) - 1; k >= 0; k-- {
 				*errPrime = (*network)[k].Backward(*errPrime, learningRate)
