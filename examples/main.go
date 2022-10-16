@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/CtrlAltDeplete/learn"
 	"gonum.org/v1/gonum/mat"
-	"learn"
 	"math/rand"
 )
 
