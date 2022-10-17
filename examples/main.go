@@ -10,16 +10,18 @@ import (
 func main() {
 	rand.Seed(42)
 
-	var xTrain = learn.BatchDataset(mat.NewDense(4, 2, []float64{
-		0, 0,
-		0, 1,
-		1, 0,
-		1, 1,
-	}), 4, false)
-
-	var yTrain = learn.BatchDataset(mat.NewDense(4, 1, []float64{
-		0, 1, 1, 1,
-	}), 4, false)
+	var xTrain, yTrain = learn.BatchDataset(
+		mat.NewDense(4, 2, []float64{
+			0, 0,
+			0, 1,
+			1, 0,
+			1, 1,
+		}),
+		mat.NewDense(4, 1, []float64{
+			0, 1, 1, 1,
+		}),
+		4,
+		false)
 
 	var network learn.Network
 	network = append(network, learn.NewDense(2, 1))
