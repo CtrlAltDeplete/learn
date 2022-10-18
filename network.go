@@ -8,9 +8,17 @@ import (
 
 type Network []Layer
 
-func NewNetwork(inputSize, outputSize, denseLayers, nodesPerLayer int) Network {
+func NewNetwork(inputSize, outputSize, denseLayers, nodesPerLayer int) *Network {
+	if denseLayers < 1 {
+		panic(fmt.Errorf("cannot make a network with %d layers", denseLayers))
+	}
+
+	if denseLayers == 1 {
+		return &Network{NewDense(inputSize, outputSize)}
+	}
+
 	var network = Network{NewDense(inputSize, nodesPerLayer)}
-	for i := 0; i < denseLayers; i++ {
+	for i := 2; i < denseLayers; i++ {
 		network = append(network, NewDense(nodesPerLayer, nodesPerLayer))
 	}
 	network = append(network, NewDense(nodesPerLayer, outputSize))
@@ -18,7 +26,7 @@ func NewNetwork(inputSize, outputSize, denseLayers, nodesPerLayer int) Network {
 		Activation:      Sigmoid,
 		ActivationPrime: SigmoidPrime,
 	})
-	return network
+	return &network
 }
 
 func (network *Network) MarshalJSON() ([]byte, error) {

@@ -72,6 +72,7 @@ func (layer *Dense) Name() string {
 
 func (layer *Dense) Forward(input *mat.Dense) mat.Dense {
 	layer._input = *input
+	layer._output = mat.Dense{}
 	layer._output.Mul(input, layer.Weights)
 
 	var rowData = layer.Biases.RawRowView(0)
